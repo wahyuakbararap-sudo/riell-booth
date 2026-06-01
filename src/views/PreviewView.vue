@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { frames } from '../data/frames'
 import { filters } from '../data/filters'
@@ -25,7 +25,6 @@ type StickerItem = {
 const placedStickers = ref<StickerItem[]>([])
 const draggingId = ref<number | null>(null)
 
-const previewRatio = computed(() => '9 / 16')
 
 function addSticker(emoji: string) {
   placedStickers.value.push({
@@ -180,53 +179,37 @@ async function downloadResult() {
       </div>
 
       <div
-        v-if="photos.length"
-        id="preview-area"
-        class="result-card"
-        :style="{
-          aspectRatio: previewRatio,
-          background: activeFrame.bg,
-        }"
-      >
-        <img
-          v-for="(photo, index) in photos"
-          :key="photo"
-          :src="photo"
-          class="slot-photo"
-          :style="{
-            left: (activeFrame.slots[index]!.x / 1080) * 100 + '%',
-            top: (activeFrame.slots[index]!.y / 1920) * 100 + '%',
-            width: (activeFrame.slots[index]!.w / 1080) * 100 + '%',
-            height: (activeFrame.slots[index]!.h / 1920) * 100 + '%',
-            filter: selectedFilter.css,
-          }"
-        />
+  v-if="photos.length"
+  id="preview-area"
+  class="frame-canvas"
+>
+  <img v-if="photos[0]" :src="photos[0]" class="photo photo-1" />
+  <img v-if="photos[1]" :src="photos[1]" class="photo photo-2" />
+  <img v-if="photos[2]" :src="photos[2]" class="photo photo-3" />
+  <img v-if="photos[3]" :src="photos[3]" class="photo photo-4" />
+  <img v-if="photos[4]" :src="photos[4]" class="photo photo-5" />
+  <img v-if="photos[5]" :src="photos[5]" class="photo photo-6" />
 
-        <img
-          v-if="activeFrame.image"
-          :src="activeFrame.image"
-          class="frame-overlay"
-        />
+  <img
+    src="/frames/test1.png"
+    class="frame-overlay"
+  />
 
-        <div v-else class="simple-frame-title">
-          Riell Booth
-        </div>
-
-        <div
-          v-for="sticker in placedStickers"
-          :key="sticker.id"
-          class="placed-sticker"
-          :style="{
-            left: sticker.x + 'px',
-            top: sticker.y + 'px',
-          }"
-          @mousedown="startDrag(sticker.id)"
-          @touchstart="startDrag(sticker.id)"
-          @dblclick="removeSticker(sticker.id)"
-        >
-          {{ sticker.emoji }}
-        </div>
-      </div>
+  <div
+    v-for="sticker in placedStickers"
+    :key="sticker.id"
+    class="placed-sticker"
+    :style="{
+      left: sticker.x + 'px',
+      top: sticker.y + 'px',
+    }"
+    @mousedown="startDrag(sticker.id)"
+    @touchstart="startDrag(sticker.id)"
+    @dblclick="removeSticker(sticker.id)"
+  >
+    {{ sticker.emoji }}
+  </div>
+</div>
 
       <div v-if="photos.length" class="editor-panel">
         <div>
