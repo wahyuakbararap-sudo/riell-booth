@@ -137,6 +137,11 @@ async function downloadResult() {
 
   ctx.filter = 'none'
 
+  if (activeFrame.value.image) {
+    const frameImg = await loadImage(activeFrame.value.image)
+    ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height)
+  }
+
   const scaleX = canvas.width / preview.clientWidth
   const scaleY = canvas.height / preview.clientHeight
 
@@ -205,6 +210,20 @@ async function downloadResult() {
             objectFit: 'cover',
             filter: selectedFilter.css,
           }"
+        />
+
+        <img
+          v-if="activeFrame.image"
+          :src="activeFrame.image"
+          style="
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            z-index: 50;
+          "
         />
 
         <div

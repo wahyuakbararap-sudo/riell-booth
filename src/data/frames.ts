@@ -6,6 +6,7 @@ export type RiellFrame = {
   top: string
   bottom: string
   accent: string
+  image?: string
 }
 
 export const frames: RiellFrame[] = [
@@ -99,4 +100,14 @@ export const frames: RiellFrame[] = [
     bottom: 'recording memories...',
     accent: '#374151',
   },
+{
+  id: 'vintage-red',
+  name: 'Vintage Red',
+  bg: '#ffffff',
+  title: '',
+  top: '',
+  bottom: '',
+  accent: '#991b1b',
+  image: '/frames/test1.png',
+},
 ]
