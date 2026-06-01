@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { stickers } from '../data/stickers'
-import { backgrounds } from '../data/backgrounds'
+import { frames } from '../data/frames'
 import { filters } from '../data/filters'
 
 const router = useRouter()
@@ -10,7 +10,7 @@ const router = useRouter()
 const layoutId = sessionStorage.getItem('riell-layout') || 'solo'
 const photos = JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[]
 
-const selectedBg = ref(backgrounds[0]!)
+const activeFrame = ref(frames[0]!)
 const selectedFilter = ref(filters[0]!)
 
 type StickerItem = {
@@ -22,7 +22,6 @@ type StickerItem = {
 
 const placedStickers = ref<StickerItem[]>([])
 const draggingId = ref<number | null>(null)
-
 const isGrid = computed(() => layoutId === 'grid')
 
 function addSticker(emoji: string) {
@@ -78,34 +77,37 @@ async function downloadResult() {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  ctx.fillStyle = selectedBg.value.color
+  ctx.fillStyle = activeFrame.value.bg
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-  ctx.fillStyle = '#111827'
+  ctx.fillStyle = activeFrame.value.accent
   ctx.font = 'bold 56px Arial'
   ctx.textAlign = 'center'
-  ctx.fillText('Riell Booth', canvas.width / 2, 90)
+  ctx.fillText(activeFrame.value.title, canvas.width / 2, 90)
+
+  ctx.font = '38px Arial'
+  ctx.fillText(activeFrame.value.top, canvas.width / 2, 145)
 
   const slots =
     layoutId === 'solo'
-      ? [{ x: 120, y: 170, w: 840, h: 1050 }]
+      ? [{ x: 120, y: 190, w: 840, h: 1000 }]
       : layoutId === 'duo'
         ? [
-            { x: 120, y: 170, w: 840, h: 500 },
-            { x: 120, y: 720, w: 840, h: 500 },
+            { x: 120, y: 190, w: 840, h: 480 },
+            { x: 120, y: 710, w: 840, h: 480 },
           ]
         : layoutId === 'grid'
           ? [
-              { x: 80, y: 170, w: 440, h: 520 },
-              { x: 560, y: 170, w: 440, h: 520 },
-              { x: 80, y: 730, w: 440, h: 520 },
-              { x: 560, y: 730, w: 440, h: 520 },
+              { x: 80, y: 190, w: 440, h: 500 },
+              { x: 560, y: 190, w: 440, h: 500 },
+              { x: 80, y: 730, w: 440, h: 500 },
+              { x: 560, y: 730, w: 440, h: 500 },
             ]
           : [
-              { x: 170, y: 160, w: 740, h: 370 },
-              { x: 170, y: 560, w: 740, h: 370 },
-              { x: 170, y: 960, w: 740, h: 370 },
-              { x: 170, y: 1360, w: 740, h: 370 },
+              { x: 170, y: 190, w: 740, h: 360 },
+              { x: 170, y: 590, w: 740, h: 360 },
+              { x: 170, y: 990, w: 740, h: 360 },
+              { x: 170, y: 1390, w: 740, h: 360 },
             ]
 
   ctx.filter = selectedFilter.value.css
@@ -118,6 +120,9 @@ async function downloadResult() {
     const img = await loadImage(photo)
 
     ctx.save()
+    ctx.shadowColor = 'rgba(0,0,0,0.18)'
+    ctx.shadowBlur = 24
+    ctx.shadowOffsetY = 10
     ctx.beginPath()
     ctx.roundRect(s.x, s.y, s.w, s.h, 32)
     ctx.clip()
@@ -137,10 +142,14 @@ async function downloadResult() {
     ctx.fillText(s.emoji, s.x * scaleX, (s.y + 60) * scaleY)
   })
 
-  ctx.fillStyle = '#ec4899'
+  ctx.fillStyle = activeFrame.value.accent
   ctx.font = 'bold 34px Arial'
   ctx.textAlign = 'center'
-  ctx.fillText('capture your moments', canvas.width / 2, canvas.height - 70)
+  ctx.fillText(activeFrame.value.bottom, canvas.width / 2, canvas.height - 110)
+
+  ctx.fillStyle = '#6b7280'
+  ctx.font = '26px Arial'
+  ctx.fillText(new Date().toLocaleDateString(), canvas.width / 2, canvas.height - 65)
 
   const link = document.createElement('a')
   link.download = 'riell-booth.png'
@@ -169,10 +178,18 @@ async function downloadResult() {
           display: 'grid',
           gap: '12px',
           gridTemplateColumns: isGrid ? '1fr 1fr' : '1fr',
-          background: selectedBg.color,
+          background: activeFrame.bg,
           overflow: 'hidden',
         }"
       >
+        <div style="grid-column: 1 / -1; text-align: center; font-weight: 900; font-size: 22px;">
+          {{ activeFrame.title }}
+        </div>
+
+        <div style="grid-column: 1 / -1; text-align: center; font-size: 22px;">
+          {{ activeFrame.top }}
+        </div>
+
         <img
           v-for="photo in photos"
           :key="photo"
@@ -196,11 +213,16 @@ async function downloadResult() {
             cursor: 'grab',
             userSelect: 'none',
             touchAction: 'none',
+            zIndex: 99,
           }"
           @mousedown="startDrag(sticker.id)"
           @touchstart="startDrag(sticker.id)"
         >
           {{ sticker.emoji }}
+        </div>
+
+        <div style="grid-column: 1 / -1; text-align: center; font-weight: 800;">
+          {{ activeFrame.bottom }}
         </div>
       </div>
 
@@ -218,20 +240,20 @@ async function downloadResult() {
           </button>
         </div>
 
-        <p style="font-weight: 800; margin-top: 18px;">Background</p>
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+        <p style="font-weight: 800; margin-top: 18px;">Frame</p>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
           <button
-            v-for="bg in backgrounds"
-            :key="bg.id"
-            :title="bg.name"
+            v-for="frame in frames"
+            :key="frame.id"
+            class="secondary-btn"
             :style="{
-              height: '44px',
-              borderRadius: '999px',
-              border: selectedBg.id === bg.id ? '4px solid #ec4899' : '2px solid white',
-              background: bg.color,
+              background: activeFrame.id === frame.id ? frame.accent : 'white',
+              color: activeFrame.id === frame.id ? 'white' : '#111827',
             }"
-            @click="selectedBg = bg"
-          />
+            @click="activeFrame = frame"
+          >
+            {{ frame.name }}
+          </button>
         </div>
 
         <p style="font-weight: 800; margin-top: 18px;">Filter</p>
