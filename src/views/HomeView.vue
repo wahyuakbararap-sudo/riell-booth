@@ -5,21 +5,31 @@ const router = useRouter()
 </script>
 
 <template>
-  <main class="page">
-    <section class="card" style="max-width: 430px; margin: 0 auto; padding: 34px; text-align: center;">
-      <p style="font-weight: 800; color: #ec4899;">📸 mobile photobooth</p>
+  <main class="home-vintage">
+    <div class="floating-deco deco-1">✦</div>
+    <div class="floating-deco deco-2">♡</div>
+    <div class="floating-deco deco-3">📷</div>
 
-      <h1 style="font-size: 44px; line-height: 1; margin: 10px 0;">
-        Riell Booth
-      </h1>
+    <section class="hero-card">
+      <p class="eyebrow">vintage mobile photobooth</p>
 
-      <p style="opacity: .7; margin-bottom: 28px;">
-        Capture your moments, keep your memories.
+      <h1>Riell Booth</h1>
+
+      <p class="subtitle">
+        Take cute photo strips, add frames, stickers, filters, and save your memory.
       </p>
 
-      <button class="primary-btn" @click="router.push('/layout')">
+      <div class="mini-strip">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+
+      <button class="start-btn" @click="router.push('/layout')">
         Start Booth
       </button>
+
+      <p class="footer-note">made for sweet little moments ✨</p>
     </section>
   </main>
 </template>
