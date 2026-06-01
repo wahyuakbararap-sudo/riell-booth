@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { frames } from '../data/frames'
+import { saveBoothSession } from '../stores/boothStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -10,6 +11,7 @@ const videoRef = ref<HTMLVideoElement | null>(null)
 const countdownText = ref('')
 const photos = ref<string[]>([])
 const isCapturing = ref(false)
+const cameraError = ref('')
 
 const frameId = String(route.params.layout)
 const activeFrame = computed(() => frames.find((frame) => frame.id === frameId) ?? frames[0]!)
@@ -31,7 +33,7 @@ async function startCamera() {
     }
   } catch (err) {
     console.error('Camera error:', err)
-    alert('Kamera gagal dibuka. Coba izinkan kamera / pakai HTTPS.')
+    cameraError.value = 'Kamera gagal dibuka. Coba izinkan kamera atau pakai HTTPS.'
   }
 }
 
@@ -51,8 +53,8 @@ function capturePhoto() {
   if (!video) return
 
   const canvas = document.createElement('canvas')
-  canvas.width = 900
-  canvas.height = 1200
+  canvas.width = 720
+  canvas.height = 960
 
   const ctx = canvas.getContext('2d')
   if (!ctx) return
@@ -63,13 +65,12 @@ function capturePhoto() {
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
   ctx.restore()
 
-  photos.value.push(canvas.toDataURL('image/png'))
+  photos.value.push(canvas.toDataURL('image/jpeg', 0.82))
 }
 
-function goPreview() {
-  sessionStorage.setItem('riell-frame', activeFrame.value.id)
-  sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
-  router.push('/preview')
+async function goPreview() {
+  saveBoothSession(activeFrame.value.id, photos.value)
+  await router.push('/preview')
 }
 
 async function startSession() {
@@ -85,7 +86,7 @@ async function startSession() {
   }
 
   isCapturing.value = false
-  goPreview()
+  await goPreview()
 }
 
 function uploadPhotos(e: Event) {
@@ -95,7 +96,6 @@ function uploadPhotos(e: Event) {
   photos.value = []
 
   const files = Array.from(input.files).slice(0, activeFrame.value.photoCount)
-
   if (files.length === 0) return
 
   let loaded = 0
@@ -103,12 +103,12 @@ function uploadPhotos(e: Event) {
   files.forEach((file) => {
     const reader = new FileReader()
 
-    reader.onload = () => {
+    reader.onload = async () => {
       photos.value.push(String(reader.result))
       loaded++
 
       if (loaded === files.length) {
-        goPreview()
+        await goPreview()
       }
     }
 
@@ -137,6 +137,10 @@ onMounted(startCamera)
           class="camera-video"
         />
 
+        <div v-if="cameraError" class="camera-error">
+          {{ cameraError }}
+        </div>
+
         <div v-if="countdownText" class="countdown">
           {{ countdownText }}
         </div>
@@ -148,7 +152,7 @@ onMounted(startCamera)
         </button>
 
         <button
-          v-if="photos.length >= activeFrame.photoCount"
+          v-if="photos.length > 0"
           class="riell-btn primary"
           @click="goPreview"
         >

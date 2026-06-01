@@ -4,11 +4,12 @@ import { useRouter } from 'vue-router'
 import { frames } from '../data/frames'
 import { filters } from '../data/filters'
 import { stickerCategories } from '../data/stickers'
+import { boothState } from '../stores/boothStore'
 
 const router = useRouter()
 
-const frameId = sessionStorage.getItem('riell-frame') || frames[0]!.id
-const photos = JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[]
+const frameId = boothState.frameId || frames[0]!.id
+const photos = boothState.photos
 
 const activeFrame = ref(frames.find((frame) => frame.id === frameId) ?? frames[0]!)
 const selectedFilter = ref(filters[0]!)
@@ -24,7 +25,7 @@ type StickerItem = {
 const placedStickers = ref<StickerItem[]>([])
 const draggingId = ref<number | null>(null)
 
-const previewRatio = computed(() => (activeFrame.value.image ? '9 / 16' : activeFrame.value.id.includes('strip') ? '9 / 16' : '4 / 5'))
+const previewRatio = computed(() => '9 / 16')
 
 function addSticker(emoji: string) {
   placedStickers.value.push({
@@ -174,10 +175,12 @@ async function downloadResult() {
       <div class="preview-head">
         <p class="eyebrow center">final touch</p>
         <h1>Preview Result</h1>
-        <p>Pilih filter, sticker, lalu download.</p>
+        <p v-if="photos.length">Pilih filter, sticker, lalu download.</p>
+        <p v-else>Belum ada foto. Balik ambil foto dulu.</p>
       </div>
 
       <div
+        v-if="photos.length"
         id="preview-area"
         class="result-card"
         :style="{
@@ -225,7 +228,7 @@ async function downloadResult() {
         </div>
       </div>
 
-      <div class="editor-panel">
+      <div v-if="photos.length" class="editor-panel">
         <div>
           <p class="panel-title">Sticker</p>
           <div class="chip-row">
@@ -269,7 +272,7 @@ async function downloadResult() {
       </div>
 
       <div class="bottom-actions">
-        <button class="riell-btn primary" @click="downloadResult">Download PNG</button>
+        <button v-if="photos.length" class="riell-btn primary" @click="downloadResult">Download PNG</button>
         <button class="riell-btn soft" @click="router.push('/layout')">Retake</button>
       </div>
     </section>
