@@ -1,30 +1,42 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { layouts } from '../data/layouts'
+import { frames } from '../data/frames'
 
 const router = useRouter()
 
-function chooseLayout(id: string) {
+function chooseFrame(id: string) {
+  sessionStorage.setItem('riell-frame', id)
   router.push(`/session/${id}`)
 }
 </script>
 
 <template>
-  <main class="page">
-    <section style="max-width: 520px; margin: 0 auto;">
-      <h1 style="font-size: 34px; margin-bottom: 6px;">Choose Layout</h1>
-      <p style="opacity: .7;">Pilih gaya foto buat sesi Riell Booth.</p>
+  <main class="page frame-page">
+    <section class="frame-wrap">
+      <p class="eyebrow center">choose your vibe</p>
+      <h1 class="page-title">Pick Your Frame</h1>
+      <p class="page-subtitle">Frame bakal otomatis nentuin jumlah foto yang diambil.</p>
 
-      <div style="display: grid; gap: 14px; margin-top: 22px;">
+      <div class="frame-grid">
         <button
-          v-for="layout in layouts"
-          :key="layout.id"
-          class="card"
-          style="padding: 22px; text-align: left; border: 0; cursor: pointer;"
-          @click="chooseLayout(layout.id)"
+          v-for="frame in frames"
+          :key="frame.id"
+          class="frame-card"
+          @click="chooseFrame(frame.id)"
         >
-          <h2 style="margin: 0;">{{ layout.name }}</h2>
-          <p style="opacity: .7; margin-bottom: 0;">{{ layout.description }}</p>
+          <div class="frame-preview" :style="{ background: frame.bg }">
+            <img v-if="frame.image" :src="frame.image" />
+            <div v-else class="emoji-frame-preview">
+              <span>📸</span>
+              <span>✨</span>
+              <span>🎀</span>
+            </div>
+          </div>
+
+          <div class="frame-info">
+            <h2>{{ frame.name }}</h2>
+            <p>{{ frame.photoCount }} photos</p>
+          </div>
         </button>
       </div>
     </section>

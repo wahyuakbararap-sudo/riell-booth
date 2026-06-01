@@ -1,113 +1,72 @@
+export type FrameSlot = {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
 export type RiellFrame = {
   id: string
   name: string
-  bg: string
-  title: string
-  top: string
-  bottom: string
-  accent: string
   image?: string
+  photoCount: number
+  bg: string
+  accent: string
+  slots: FrameSlot[]
 }
 
 export const frames: RiellFrame[] = [
   {
-    id: 'kawaii',
-    name: 'Kawaii Pink',
+    id: 'vintage-red',
+    name: 'Vintage Red',
+    image: '/frames/test1.png',
+    photoCount: 6,
+    bg: '#ffffff',
+    accent: '#991b1b',
+    slots: [
+      { x: 95, y: 170, w: 390, h: 330 },
+      { x: 595, y: 170, w: 390, h: 330 },
+      { x: 95, y: 580, w: 390, h: 330 },
+      { x: 595, y: 580, w: 390, h: 330 },
+      { x: 95, y: 990, w: 390, h: 330 },
+      { x: 595, y: 990, w: 390, h: 330 },
+    ],
+  },
+  {
+    id: 'kawaii-grid',
+    name: 'Kawaii Grid',
+    photoCount: 4,
     bg: '#ffe4f3',
-    title: '🎀 Riell Booth 🎀',
-    top: '✨ 🌸 💖 🌸 ✨',
-    bottom: 'sweet little memory',
     accent: '#ec4899',
+    slots: [
+      { x: 80, y: 190, w: 440, h: 500 },
+      { x: 560, y: 190, w: 440, h: 500 },
+      { x: 80, y: 730, w: 440, h: 500 },
+      { x: 560, y: 730, w: 440, h: 500 },
+    ],
   },
   {
-    id: 'strawberry',
-    name: 'Strawberry',
-    bg: '#fff1f2',
-    title: '🍓 Strawberry Booth 🍓',
-    top: '🍓 🍰 🍓 🍰 🍓',
-    bottom: 'berry cute moment',
-    accent: '#f43f5e',
-  },
-  {
-    id: 'cloud',
-    name: 'Dreamy Cloud',
-    bg: '#eff6ff',
-    title: '☁️ Dream Booth ☁️',
-    top: '☁️ ⭐ ☁️ ⭐ ☁️',
-    bottom: 'soft dreamy day',
-    accent: '#60a5fa',
-  },
-  {
-    id: 'teddy',
-    name: 'Teddy Bear',
-    bg: '#fef3c7',
-    title: '🧸 Teddy Booth 🧸',
-    top: '🤎 🧸 🤎 🧸 🤎',
-    bottom: 'bear hugs only',
-    accent: '#92400e',
-  },
-  {
-    id: 'y2k',
-    name: 'Y2K',
-    bg: '#f5f3ff',
-    title: '💿 Y2K Booth 💿',
-    top: '⚡ 💿 ✨ 💿 ⚡',
-    bottom: '2000s energy',
-    accent: '#8b5cf6',
-  },
-  {
-    id: 'pixel',
-    name: 'Pixel Game',
-    bg: '#dbeafe',
-    title: '🎮 Pixel Booth 🎮',
-    top: '⭐ 🎮 ⭐ 🎮 ⭐',
-    bottom: 'level complete!',
-    accent: '#2563eb',
-  },
-  {
-    id: 'birthday',
-    name: 'Birthday',
+    id: 'classic-strip',
+    name: 'Classic Strip',
+    photoCount: 4,
     bg: '#fff7ed',
-    title: '🎂 Birthday Booth 🎂',
-    top: '🎈 🎁 ✨ 🎁 🎈',
-    bottom: 'happy birthday!',
-    accent: '#f97316',
+    accent: '#92400e',
+    slots: [
+      { x: 170, y: 190, w: 740, h: 360 },
+      { x: 170, y: 590, w: 740, h: 360 },
+      { x: 170, y: 990, w: 740, h: 360 },
+      { x: 170, y: 1390, w: 740, h: 360 },
+    ],
   },
   {
-    id: 'valentine',
-    name: 'Valentine',
-    bg: '#ffe4e6',
-    title: '❤️ Love Booth ❤️',
-    top: '💌 ❤️ 🌹 ❤️ 💌',
-    bottom: 'our little memory',
-    accent: '#e11d48',
+    id: 'duo-soft',
+    name: 'Duo Soft',
+    photoCount: 2,
+    bg: '#eff6ff',
+    accent: '#2563eb',
+    slots: [
+      { x: 120, y: 230, w: 840, h: 560 },
+      { x: 120, y: 870, w: 840, h: 560 },
+    ],
   },
-  {
-    id: 'sakura',
-    name: 'Sakura',
-    bg: '#fdf2f8',
-    title: '🌸 Sakura Booth 🌸',
-    top: '🌸 🍡 🌸 🍡 🌸',
-    bottom: 'soft spring moment',
-    accent: '#db2777',
-  },
-  {
-    id: 'retro',
-    name: 'Retro Cam',
-    bg: '#f3f4f6',
-    title: '📼 Retro Booth 📼',
-    top: '📼 ✨ 📼 ✨ 📼',
-    bottom: 'recording memories...',
-    accent: '#374151',
-  },
-{
-  id: 'vintage-red',
-  name: 'Vintage Red',
-  bg: '#ffffff',
-  title: '',
-  top: '',
-  bottom: '',
-  accent: '#991b1b',
-  image: '/frames/test1.png',
-},
 ]

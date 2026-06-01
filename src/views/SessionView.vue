@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { layouts } from '../data/layouts'
+import { frames } from '../data/frames'
 
 const route = useRoute()
 const router = useRouter()
@@ -9,9 +9,10 @@ const router = useRouter()
 const videoRef = ref<HTMLVideoElement | null>(null)
 const countdownText = ref('')
 const photos = ref<string[]>([])
+const isCapturing = ref(false)
 
-const layoutId = String(route.params.layout)
-const selectedLayout = layouts.find((l) => l.id === layoutId) ?? layouts[0]!
+const frameId = String(route.params.layout)
+const activeFrame = computed(() => frames.find((frame) => frame.id === frameId) ?? frames[0]!)
 
 async function startCamera() {
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -29,11 +30,11 @@ async function startCamera() {
 async function countdown() {
   for (let i = 3; i > 0; i--) {
     countdownText.value = String(i)
-    await new Promise((r) => setTimeout(r, 700))
+    await new Promise((resolve) => setTimeout(resolve, 700))
   }
 
   countdownText.value = 'SNAP'
-  await new Promise((r) => setTimeout(r, 350))
+  await new Promise((resolve) => setTimeout(resolve, 350))
   countdownText.value = ''
 }
 
@@ -58,51 +59,89 @@ function capturePhoto() {
 }
 
 async function startSession() {
+  isCapturing.value = true
   photos.value = []
 
-  for (let i = 0; i < selectedLayout.photoCount; i++) {
+  for (let i = 0; i < activeFrame.value.photoCount; i++) {
     await countdown()
     capturePhoto()
-    await new Promise((r) => setTimeout(r, 500))
+    await new Promise((resolve) => setTimeout(resolve, 450))
   }
 
-  sessionStorage.setItem('riell-layout', selectedLayout.id)
+  sessionStorage.setItem('riell-frame', activeFrame.value.id)
   sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
 
+  isCapturing.value = false
   router.push('/preview')
+}
+
+function uploadPhotos(e: Event) {
+  const input = e.target as HTMLInputElement
+  if (!input.files) return
+
+  photos.value = []
+  const files = Array.from(input.files).slice(0, activeFrame.value.photoCount)
+
+  files.forEach((file) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      photos.value.push(String(reader.result))
+
+      if (photos.value.length === files.length) {
+        sessionStorage.setItem('riell-frame', activeFrame.value.id)
+        sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
+        router.push('/preview')
+      }
+    }
+    reader.readAsDataURL(file)
+  })
 }
 
 onMounted(startCamera)
 </script>
 
 <template>
-  <main class="page">
-    <section style="max-width: 430px; margin: 0 auto;">
-      <div style="text-align: center; margin-bottom: 16px;">
-        <h1 style="margin-bottom: 4px;">{{ selectedLayout.name }}</h1>
-        <p style="opacity: .7;">{{ photos.length }}/{{ selectedLayout.photoCount }} captured</p>
+  <main class="page session-page">
+    <section class="session-wrap">
+      <div class="session-head">
+        <p class="eyebrow">riell session</p>
+        <h1>{{ activeFrame.name }}</h1>
+        <p>{{ photos.length }}/{{ activeFrame.photoCount }} captured</p>
       </div>
 
-      <div class="card" style="position: relative; overflow: hidden; aspect-ratio: 3/4;">
+      <div class="camera-card">
         <video
           ref="videoRef"
           autoplay
           playsinline
           muted
-          style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"
+          class="camera-video"
         />
 
-        <div
-          v-if="countdownText"
-          style="position: absolute; inset: 0; display: grid; place-items: center; color: white; font-size: 70px; font-weight: 900; text-shadow: 0 6px 30px #000;"
-        >
+        <div v-if="countdownText" class="countdown">
           {{ countdownText }}
         </div>
       </div>
 
-      <div style="display: grid; gap: 12px; margin-top: 18px;">
-        <button class="primary-btn" @click="startSession">Start Photo</button>
-        <button class="secondary-btn" @click="router.push('/layout')">Change Layout</button>
+      <div class="action-panel">
+        <button class="riell-btn primary" :disabled="isCapturing" @click="startSession">
+          {{ isCapturing ? 'Capturing...' : `Start ${activeFrame.photoCount} Photos` }}
+        </button>
+
+        <label class="riell-btn ghost">
+          Upload Photos
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            hidden
+            @change="uploadPhotos"
+          />
+        </label>
+
+        <button class="riell-btn soft" @click="router.push('/layout')">
+          Change Frame
+        </button>
       </div>
     </section>
   </main>
