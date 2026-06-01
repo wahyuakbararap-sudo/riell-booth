@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { stickers } from '../data/stickers'
 import { frames } from '../data/frames'
 import { filters } from '../data/filters'
+import { stickerCategories } from '../data/stickers'
 
 const router = useRouter()
 
@@ -12,6 +12,7 @@ const photos = JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as str
 
 const activeFrame = ref(frames[0]!)
 const selectedFilter = ref(filters[0]!)
+const activeStickerCategory = ref(stickerCategories[0]!)
 
 type StickerItem = {
   id: number
@@ -56,6 +57,10 @@ function dragSticker(e: MouseEvent | TouchEvent) {
 
 function stopDrag() {
   draggingId.value = null
+}
+
+function removeSticker(id: number) {
+  placedStickers.value = placedStickers.value.filter((s) => s.id !== id)
 }
 
 function loadImage(src: string) {
@@ -217,6 +222,7 @@ async function downloadResult() {
           }"
           @mousedown="startDrag(sticker.id)"
           @touchstart="startDrag(sticker.id)"
+          @dblclick="removeSticker(sticker.id)"
         >
           {{ sticker.emoji }}
         </div>
@@ -228,9 +234,26 @@ async function downloadResult() {
 
       <div class="card" style="padding: 16px; margin-top: 16px;">
         <p style="font-weight: 800;">Sticker</p>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
           <button
-            v-for="sticker in stickers"
+            v-for="category in stickerCategories"
+            :key="category.id"
+            class="secondary-btn"
+            :style="{
+              padding: '8px 12px',
+              background: activeStickerCategory.id === category.id ? '#ec4899' : 'white',
+              color: activeStickerCategory.id === category.id ? 'white' : '#111827',
+            }"
+            @click="activeStickerCategory = category"
+          >
+            {{ category.name }}
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+          <button
+            v-for="sticker in activeStickerCategory.stickers"
             :key="sticker"
             class="secondary-btn"
             style="padding: 10px 12px; font-size: 24px;"

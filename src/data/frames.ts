@@ -1,4 +1,14 @@
-export const frames = [
+export type RiellFrame = {
+  id: string
+  name: string
+  bg: string
+  title: string
+  top: string
+  bottom: string
+  accent: string
+}
+
+export const frames: RiellFrame[] = [
   {
     id: 'kawaii',
     name: 'Kawaii Pink',
@@ -44,31 +54,49 @@ export const frames = [
     bottom: '2000s energy',
     accent: '#8b5cf6',
   },
-{
-  id: 'bunny',
-  name: 'Bunny Cafe',
-  bg: '#fdf2f8',
-  title: '🐰 Bunny Booth 🐰',
-  top: '🐰 🎀 🌸 🎀 🐰',
-  bottom: 'cute bunny memories',
-  accent: '#ec4899',
-},
-{
-  id: 'pixel',
-  name: 'Pixel Adventure',
-  bg: '#dbeafe',
-  title: '🎮 Pixel Booth 🎮',
-  top: '⭐ 🎮 ⭐ 🎮 ⭐',
-  bottom: 'level complete!',
-  accent: '#2563eb',
-},
-{
-  id: 'retro',
-  name: 'Retro Camcorder',
-  bg: '#f3f4f6',
-  title: '📼 Retro Booth 📼',
-  top: '📼 ✨ 📼 ✨ 📼',
-  bottom: 'recording memories...',
-  accent: '#374151',
-},
+  {
+    id: 'pixel',
+    name: 'Pixel Game',
+    bg: '#dbeafe',
+    title: '🎮 Pixel Booth 🎮',
+    top: '⭐ 🎮 ⭐ 🎮 ⭐',
+    bottom: 'level complete!',
+    accent: '#2563eb',
+  },
+  {
+    id: 'birthday',
+    name: 'Birthday',
+    bg: '#fff7ed',
+    title: '🎂 Birthday Booth 🎂',
+    top: '🎈 🎁 ✨ 🎁 🎈',
+    bottom: 'happy birthday!',
+    accent: '#f97316',
+  },
+  {
+    id: 'valentine',
+    name: 'Valentine',
+    bg: '#ffe4e6',
+    title: '❤️ Love Booth ❤️',
+    top: '💌 ❤️ 🌹 ❤️ 💌',
+    bottom: 'our little memory',
+    accent: '#e11d48',
+  },
+  {
+    id: 'sakura',
+    name: 'Sakura',
+    bg: '#fdf2f8',
+    title: '🌸 Sakura Booth 🌸',
+    top: '🌸 🍡 🌸 🍡 🌸',
+    bottom: 'soft spring moment',
+    accent: '#db2777',
+  },
+  {
+    id: 'retro',
+    name: 'Retro Cam',
+    bg: '#f3f4f6',
+    title: '📼 Retro Booth 📼',
+    top: '📼 ✨ 📼 ✨ 📼',
+    bottom: 'recording memories...',
+    accent: '#374151',
+  },
 ]
