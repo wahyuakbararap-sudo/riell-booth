@@ -15,16 +15,24 @@ const frameId = String(route.params.layout)
 const activeFrame = computed(() => frames.find((frame) => frame.id === frameId) ?? frames[0]!)
 
 async function startCamera() {
-  const stream = await navigator.mediaDevices.getUserMedia({
-    video: {
-      facingMode: 'user',
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-    },
-    audio: false,
-  })
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'user',
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+      audio: false,
+    })
 
-  if (videoRef.value) videoRef.value.srcObject = stream
+    if (videoRef.value) {
+      videoRef.value.srcObject = stream
+      await videoRef.value.play()
+    }
+  } catch (err) {
+    console.error('Camera error:', err)
+    alert('Kamera gagal dibuka. Coba izinkan kamera / pakai HTTPS.')
+  }
 }
 
 async function countdown() {
@@ -58,7 +66,15 @@ function capturePhoto() {
   photos.value.push(canvas.toDataURL('image/png'))
 }
 
+function goPreview() {
+  sessionStorage.setItem('riell-frame', activeFrame.value.id)
+  sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
+  router.push('/preview')
+}
+
 async function startSession() {
+  if (isCapturing.value) return
+
   isCapturing.value = true
   photos.value = []
 
@@ -68,11 +84,8 @@ async function startSession() {
     await new Promise((resolve) => setTimeout(resolve, 450))
   }
 
-  sessionStorage.setItem('riell-frame', activeFrame.value.id)
-  sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
-
   isCapturing.value = false
-  router.push('/preview')
+  goPreview()
 }
 
 function uploadPhotos(e: Event) {
@@ -80,19 +93,25 @@ function uploadPhotos(e: Event) {
   if (!input.files) return
 
   photos.value = []
+
   const files = Array.from(input.files).slice(0, activeFrame.value.photoCount)
+
+  if (files.length === 0) return
+
+  let loaded = 0
 
   files.forEach((file) => {
     const reader = new FileReader()
+
     reader.onload = () => {
       photos.value.push(String(reader.result))
+      loaded++
 
-      if (photos.value.length === files.length) {
-        sessionStorage.setItem('riell-frame', activeFrame.value.id)
-        sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
-        router.push('/preview')
+      if (loaded === files.length) {
+        goPreview()
       }
     }
+
     reader.readAsDataURL(file)
   })
 }
@@ -126,6 +145,14 @@ onMounted(startCamera)
       <div class="action-panel">
         <button class="riell-btn primary" :disabled="isCapturing" @click="startSession">
           {{ isCapturing ? 'Capturing...' : `Start ${activeFrame.photoCount} Photos` }}
+        </button>
+
+        <button
+          v-if="photos.length >= activeFrame.photoCount"
+          class="riell-btn primary"
+          @click="goPreview"
+        >
+          Continue to Preview
         </button>
 
         <label class="riell-btn ghost">
