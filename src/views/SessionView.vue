@@ -105,15 +105,11 @@ function capturePhoto() {
   photos.value.push(image)
 }
 
-function goPreview() {
+async function goPreview() {
   sessionStorage.setItem('riell-frame', activeFrame.value.id)
   sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
 
-  // Pakai Vue Router dulu
-  router.push('/preview').catch(() => {
-    // Fallback kalau router macet di browser tertentu
-    window.location.assign('/preview')
-  })
+  await router.replace({ name: 'preview' })
 }
 
 async function startSession() {
@@ -143,9 +139,8 @@ async function startSession() {
   isCapturing.value = false
 
   // Delay kecil biar UI sempet update 6/6, lalu auto next
-  setTimeout(() => {
-    goPreview()
-  }, 300)
+  await new Promise((resolve) => setTimeout(resolve, 300))
+await goPreview()
 }
 
 function uploadPhotos(e: Event) {
