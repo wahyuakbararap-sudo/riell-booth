@@ -11,6 +11,14 @@ const videoRef = ref<HTMLVideoElement | null>(null)
 const countdownText = ref('')
 const photos = ref<string[]>([])
 const isCapturing = ref(false)
+const flash = ref(false)
+
+function triggerFlash() {
+  flash.value = true
+  setTimeout(() => {
+    flash.value = false
+  }, 160)
+}
 const cameraError = ref('')
 
 const frameId = String(route.params.layout)
@@ -72,11 +80,22 @@ async function goPreview() {
 async function startSession() {
   if (isCapturing.value) return
 
+  const retakeIndex = sessionStorage.getItem('riell-retake-index')
+  if (retakeIndex !== null) {
+    isCapturing.value = true
+    await countdown()
+    triggerFlash()
+    capturePhoto()
+    isCapturing.value = false
+    return
+  }
+
   isCapturing.value = true
   photos.value = []
 
   for (let i = 0; i < activeFrame.value.photoCount; i++) {
     await countdown()
+    triggerFlash()
     capturePhoto()
     await new Promise((resolve) => setTimeout(resolve, 450))
   }
@@ -125,22 +144,20 @@ onMounted(startCamera)
       </div>
 
       <div class="camera-card">
-        <video
-          ref="videoRef"
-          autoplay
-          playsinline
-          muted
-          class="camera-video"
-        />
+  <video
+    ref="videoRef"
+    autoplay
+    playsinline
+    muted
+    class="camera-video"
+  ></video>
 
-        <div v-if="cameraError" class="camera-error">
-          {{ cameraError }}
-        </div>
+  <div v-if="flash" class="camera-flash"></div>
 
-        <div v-if="countdownText" class="countdown">
-          {{ countdownText }}
-        </div>
-      </div>
+  <div v-if="countdownText" class="countdown">
+    {{ countdownText }}
+  </div>
+</div>
 
       <div class="action-panel">
         <button class="riell-btn primary" :disabled="isCapturing" @click="startSession">
@@ -173,3 +190,12 @@ onMounted(startCamera)
     </section>
   </main>
 </template>
+
+const flash = ref(false)
+
+function triggerFlash() {
+  flash.value = true
+  setTimeout(() => {
+    flash.value = false
+  }, 160)
+}

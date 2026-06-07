@@ -89,6 +89,12 @@ function removeSticker(id: number) {
   placedStickers.value = placedStickers.value.filter((s) => s.id !== id)
 }
 
+function retakePhoto(index: number) {
+  sessionStorage.setItem('riell-retake-index', String(index))
+  sessionStorage.setItem('riell-photos', JSON.stringify(photos))
+  router.push(`/session/${activeFrame.value.id}`)
+}
+
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve) => {
     const img = new Image()
@@ -220,6 +226,19 @@ async function downloadResult() {
           }"
         />
 
+        <button
+          v-for="(_, index) in photos.slice(0, 6)"
+          :key="'retake-' + index"
+          class="retake-photo-btn"
+          :style="{
+            left: (frameSlots[index]!.x / FRAME_W) * 100 + '%',
+            top: (frameSlots[index]!.y / FRAME_H) * 100 + '%',
+          }"
+          @click="retakePhoto(index)"
+        >
+          ↺
+        </button>
+
         <img
           :src="activeFrame.image || '/frames/test1.png'"
           class="frame-overlay"
@@ -291,3 +310,9 @@ async function downloadResult() {
     </section>
   </main>
 </template>
+
+function retakePhoto(index: number) {
+  sessionStorage.setItem('riell-retake-index', String(index))
+  sessionStorage.setItem('riell-photos', JSON.stringify(photos))
+  router.push(`/session/${activeFrame.value.id}`)
+}
