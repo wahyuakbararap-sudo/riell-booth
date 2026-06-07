@@ -2,7 +2,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { frames } from '../data/frames'
-import { boothState } from '../stores/boothStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,7 +18,6 @@ const activeFrame = computed(() => frames.find((frame) => frame.id === frameId) 
 
 function triggerFlash() {
   flash.value = true
-
   setTimeout(() => {
     flash.value = false
   }, 160)
@@ -95,25 +93,27 @@ function capturePhoto() {
     savedPhotos[Number(retakeIndex)] = image
 
     photos.value = savedPhotos
-    boothState.photos = savedPhotos
-    boothState.frameId = activeFrame.value.id
 
     sessionStorage.removeItem('riell-retake-index')
     sessionStorage.setItem('riell-frame', activeFrame.value.id)
     sessionStorage.setItem('riell-photos', JSON.stringify(savedPhotos))
 
-    router.push('/preview')
+    goPreview()
     return
   }
 
   photos.value.push(image)
 }
 
-async function goPreview() {
+function goPreview() {
   sessionStorage.setItem('riell-frame', activeFrame.value.id)
   sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
 
-  window.location.href = '/preview'
+  // Pakai Vue Router dulu
+  router.push('/preview').catch(() => {
+    // Fallback kalau router macet di browser tertentu
+    window.location.assign('/preview')
+  })
 }
 
 async function startSession() {
@@ -141,7 +141,11 @@ async function startSession() {
   }
 
   isCapturing.value = false
-  await goPreview()
+
+  // Delay kecil biar UI sempet update 6/6, lalu auto next
+  setTimeout(() => {
+    goPreview()
+  }, 300)
 }
 
 function uploadPhotos(e: Event) {
@@ -210,12 +214,12 @@ onMounted(startCamera)
         </button>
 
         <button
-  v-if="photos.length >= activeFrame.photoCount"
-  class="riell-btn primary"
-  @click="goPreview"
->
-  Continue to Preview
-</button>
+          v-if="photos.length >= activeFrame.photoCount"
+          class="riell-btn primary"
+          @click="goPreview"
+        >
+          Continue to Preview
+        </button>
 
         <label class="riell-btn ghost">
           Upload Photos
