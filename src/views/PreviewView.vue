@@ -8,6 +8,9 @@ import { boothState } from '../stores/boothStore'
 
 const router = useRouter()
 
+const FRAME_W = 1181
+const FRAME_H = 1772
+
 const frameId = boothState.frameId || frames[0]!.id
 const photos = boothState.photos
 
@@ -22,9 +25,31 @@ type StickerItem = {
   y: number
 }
 
+type Slot = {
+  x: number
+  y: number
+  w: number
+  h: number
+  round?: boolean
+}
+
+/**
+ * Slot pakai ukuran asli frame 1181 x 1772.
+ * Ini dibuat buat frame /frames/test1.png yang punya:
+ * kiri atas bulat, kanan atas kotak, kiri tengah kotak,
+ * kanan tengah bulat, kiri bawah bulat, kanan bawah kotak.
+ */
+const frameSlots: Slot[] = [
+  { x: 62, y: 54, w: 502, h: 503, round: true },
+  { x: 615, y: 119, w: 512, h: 435 },
+  { x: 62, y: 647, w: 503, h: 526 },
+  { x: 615, y: 630, w: 512, h: 512, round: true },
+  { x: 62, y: 1217, w: 503, h: 503, round: true },
+  { x: 615, y: 1256, w: 512, h: 425 },
+]
+
 const placedStickers = ref<StickerItem[]>([])
 const draggingId = ref<number | null>(null)
-
 
 function addSticker(emoji: string) {
   placedStickers.value.push({
@@ -106,27 +131,33 @@ async function downloadResult() {
   if (!preview) return
 
   const canvas = document.createElement('canvas')
-  canvas.width = 1080
-  canvas.height = 1920
+  canvas.width = FRAME_W
+  canvas.height = FRAME_H
 
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  ctx.fillStyle = activeFrame.value.bg
+  ctx.fillStyle = activeFrame.value.bg || '#ffffff'
   ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   ctx.filter = selectedFilter.value.css
 
-  for (let i = 0; i < photos.length && i < activeFrame.value.slots.length; i++) {
+  for (let i = 0; i < photos.length && i < frameSlots.length; i++) {
     const photo = photos[i]
-    const slot = activeFrame.value.slots[i]
+    const slot = frameSlots[i]
     if (!photo || !slot) continue
 
     const img = await loadImage(photo)
 
     ctx.save()
     ctx.beginPath()
-    ctx.roundRect(slot.x, slot.y, slot.w, slot.h, 28)
+
+    if (slot.round) {
+      ctx.arc(slot.x + slot.w / 2, slot.y + slot.h / 2, Math.min(slot.w, slot.h) / 2, 0, Math.PI * 2)
+    } else {
+      ctx.roundRect(slot.x, slot.y, slot.w, slot.h, 26)
+    }
+
     ctx.clip()
     drawCoverImage(ctx, img, slot.x, slot.y, slot.w, slot.h)
     ctx.restore()
@@ -134,20 +165,11 @@ async function downloadResult() {
 
   ctx.filter = 'none'
 
-  if (activeFrame.value.image) {
-    const frameImg = await loadImage(activeFrame.value.image)
-    ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height)
-  } else {
-    ctx.fillStyle = activeFrame.value.accent
-    ctx.font = 'bold 58px Arial'
-    ctx.textAlign = 'center'
-    ctx.fillText('Riell Booth', canvas.width / 2, 90)
-    ctx.font = '34px Arial'
-    ctx.fillText('capture your moments', canvas.width / 2, canvas.height - 70)
-  }
+  const frameImg = await loadImage(activeFrame.value.image || '/frames/test1.png')
+  ctx.drawImage(frameImg, 0, 0, FRAME_W, FRAME_H)
 
-  const scaleX = canvas.width / preview.clientWidth
-  const scaleY = canvas.height / preview.clientHeight
+  const scaleX = FRAME_W / preview.clientWidth
+  const scaleY = FRAME_H / preview.clientHeight
 
   ctx.font = '70px Arial'
   ctx.textAlign = 'left'
@@ -179,37 +201,45 @@ async function downloadResult() {
       </div>
 
       <div
-  v-if="photos.length"
-  id="preview-area"
-  class="frame-canvas"
->
-  <img v-if="photos[0]" :src="photos[0]" class="photo photo-1" />
-  <img v-if="photos[1]" :src="photos[1]" class="photo photo-2" />
-  <img v-if="photos[2]" :src="photos[2]" class="photo photo-3" />
-  <img v-if="photos[3]" :src="photos[3]" class="photo photo-4" />
-  <img v-if="photos[4]" :src="photos[4]" class="photo photo-5" />
-  <img v-if="photos[5]" :src="photos[5]" class="photo photo-6" />
+        v-if="photos.length"
+        id="preview-area"
+        class="frame-canvas"
+      >
+        <img
+          v-for="(photo, index) in photos.slice(0, 6)"
+          :key="index"
+          :src="photo"
+          class="photo"
+          :class="{ 'is-round': frameSlots[index]?.round }"
+          :style="{
+            left: (frameSlots[index]!.x / FRAME_W) * 100 + '%',
+            top: (frameSlots[index]!.y / FRAME_H) * 100 + '%',
+            width: (frameSlots[index]!.w / FRAME_W) * 100 + '%',
+            height: (frameSlots[index]!.h / FRAME_H) * 100 + '%',
+            filter: selectedFilter.css,
+          }"
+        />
 
-  <img
-    src="/frames/test1.png"
-    class="frame-overlay"
-  />
+        <img
+          :src="activeFrame.image || '/frames/test1.png'"
+          class="frame-overlay"
+        />
 
-  <div
-    v-for="sticker in placedStickers"
-    :key="sticker.id"
-    class="placed-sticker"
-    :style="{
-      left: sticker.x + 'px',
-      top: sticker.y + 'px',
-    }"
-    @mousedown="startDrag(sticker.id)"
-    @touchstart="startDrag(sticker.id)"
-    @dblclick="removeSticker(sticker.id)"
-  >
-    {{ sticker.emoji }}
-  </div>
-</div>
+        <div
+          v-for="sticker in placedStickers"
+          :key="sticker.id"
+          class="placed-sticker"
+          :style="{
+            left: sticker.x + 'px',
+            top: sticker.y + 'px',
+          }"
+          @mousedown="startDrag(sticker.id)"
+          @touchstart="startDrag(sticker.id)"
+          @dblclick="removeSticker(sticker.id)"
+        >
+          {{ sticker.emoji }}
+        </div>
+      </div>
 
       <div v-if="photos.length" class="editor-panel">
         <div>
