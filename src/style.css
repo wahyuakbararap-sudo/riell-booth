@@ -1,6 +1,9 @@
 /* =========================
    RIELL BOOTH FRAME V3
 ========================= */
+body {
+  background: red !important;
+}
 
 .frame-canvas {
   position: relative;

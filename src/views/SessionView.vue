@@ -59,11 +59,7 @@ function capturePhoto() {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  ctx.save()
-  ctx.translate(canvas.width, 0)
-  ctx.scale(-1, 1)
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-  ctx.restore()
 
   photos.value.push(canvas.toDataURL('image/jpeg', 0.82))
 }
