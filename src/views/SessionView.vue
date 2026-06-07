@@ -109,7 +109,11 @@ async function goPreview() {
   sessionStorage.setItem('riell-frame', activeFrame.value.id)
   sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
 
-  await router.replace({ name: 'preview' })
+  try {
+    await router.replace({ name: 'preview' })
+  } catch {
+    window.location.hash = '#/preview'
+  }
 }
 
 async function startSession() {
@@ -140,7 +144,7 @@ async function startSession() {
 
   // Delay kecil biar UI sempet update 6/6, lalu auto next
   await new Promise((resolve) => setTimeout(resolve, 300))
-await goPreview()
+  await goPreview()
 }
 
 function uploadPhotos(e: Event) {

@@ -344,30 +344,3 @@ async function downloadResult() {
     </section>
   </main>
 </template>
-
-.film-loading {
-  position: fixed;
-  inset: 0;
-  background: #fff7ed;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: 700;
-  z-index: 999;
-}
-
-.strip-leave-active {
-  animation: stripDrop 1.2s ease forwards;
-}
-
-@keyframes stripDrop {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-}
