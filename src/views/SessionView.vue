@@ -110,13 +110,10 @@ function capturePhoto() {
 }
 
 async function goPreview() {
-  boothState.frameId = activeFrame.value.id
-  boothState.photos = photos.value
-
   sessionStorage.setItem('riell-frame', activeFrame.value.id)
   sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
 
-  await router.push('/preview')
+  window.location.href = '/preview'
 }
 
 async function startSession() {
@@ -211,6 +208,14 @@ onMounted(startCamera)
         <button class="riell-btn primary" :disabled="isCapturing" @click="startSession">
           {{ isCapturing ? 'Capturing...' : `Start ${activeFrame.photoCount} Photos` }}
         </button>
+
+        <button
+  v-if="photos.length >= activeFrame.photoCount"
+  class="riell-btn primary"
+  @click="goPreview"
+>
+  Continue to Preview
+</button>
 
         <label class="riell-btn ghost">
           Upload Photos
