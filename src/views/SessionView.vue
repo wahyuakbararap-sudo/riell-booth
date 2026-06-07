@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { frames } from '../data/frames'
-import { saveBoothSession } from '../stores/boothStore'
+import { boothState } from '../stores/boothStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -11,21 +11,24 @@ const videoRef = ref<HTMLVideoElement | null>(null)
 const countdownText = ref('')
 const photos = ref<string[]>([])
 const isCapturing = ref(false)
+const cameraError = ref('')
 const flash = ref(false)
+
+const frameId = String(route.params.layout || sessionStorage.getItem('riell-frame') || '')
+const activeFrame = computed(() => frames.find((frame) => frame.id === frameId) ?? frames[0]!)
 
 function triggerFlash() {
   flash.value = true
+
   setTimeout(() => {
     flash.value = false
   }, 160)
 }
-const cameraError = ref('')
-
-const frameId = String(route.params.layout)
-const activeFrame = computed(() => frames.find((frame) => frame.id === frameId) ?? frames[0]!)
 
 async function startCamera() {
   try {
+    cameraError.value = ''
+
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: 'user',
@@ -39,9 +42,8 @@ async function startCamera() {
       videoRef.value.srcObject = stream
       await videoRef.value.play()
     }
-  } catch (err) {
-    console.error('Camera error:', err)
-    cameraError.value = 'Kamera gagal dibuka. Coba izinkan kamera atau pakai HTTPS.'
+  } catch {
+    cameraError.value = 'Kamera gagal dibuka. Izinkan kamera dulu / pakai HTTPS.'
   }
 }
 
@@ -61,19 +63,59 @@ function capturePhoto() {
   if (!video) return
 
   const canvas = document.createElement('canvas')
-  canvas.width = 720
-  canvas.height = 960
+  canvas.width = 900
+  canvas.height = 1200
 
   const ctx = canvas.getContext('2d')
   if (!ctx) return
 
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+  const videoRatio = video.videoWidth / video.videoHeight
+  const canvasRatio = canvas.width / canvas.height
 
-  photos.value.push(canvas.toDataURL('image/jpeg', 0.82))
+  let sx = 0
+  let sy = 0
+  let sw = video.videoWidth
+  let sh = video.videoHeight
+
+  if (videoRatio > canvasRatio) {
+    sw = video.videoHeight * canvasRatio
+    sx = (video.videoWidth - sw) / 2
+  } else {
+    sh = video.videoWidth / canvasRatio
+    sy = (video.videoHeight - sh) / 2
+  }
+
+  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
+
+  const image = canvas.toDataURL('image/png')
+  const retakeIndex = sessionStorage.getItem('riell-retake-index')
+
+  if (retakeIndex !== null) {
+    const savedPhotos = JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[]
+    savedPhotos[Number(retakeIndex)] = image
+
+    photos.value = savedPhotos
+    boothState.photos = savedPhotos
+    boothState.frameId = activeFrame.value.id
+
+    sessionStorage.removeItem('riell-retake-index')
+    sessionStorage.setItem('riell-frame', activeFrame.value.id)
+    sessionStorage.setItem('riell-photos', JSON.stringify(savedPhotos))
+
+    router.push('/preview')
+    return
+  }
+
+  photos.value.push(image)
 }
 
 async function goPreview() {
-  saveBoothSession(activeFrame.value.id, photos.value)
+  boothState.frameId = activeFrame.value.id
+  boothState.photos = photos.value
+
+  sessionStorage.setItem('riell-frame', activeFrame.value.id)
+  sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
+
   await router.push('/preview')
 }
 
@@ -81,6 +123,7 @@ async function startSession() {
   if (isCapturing.value) return
 
   const retakeIndex = sessionStorage.getItem('riell-retake-index')
+
   if (retakeIndex !== null) {
     isCapturing.value = true
     await countdown()
@@ -111,6 +154,7 @@ function uploadPhotos(e: Event) {
   photos.value = []
 
   const files = Array.from(input.files).slice(0, activeFrame.value.photoCount)
+
   if (files.length === 0) return
 
   let loaded = 0
@@ -118,12 +162,12 @@ function uploadPhotos(e: Event) {
   files.forEach((file) => {
     const reader = new FileReader()
 
-    reader.onload = async () => {
+    reader.onload = () => {
       photos.value.push(String(reader.result))
       loaded++
 
       if (loaded === files.length) {
-        await goPreview()
+        goPreview()
       }
     }
 
@@ -144,32 +188,28 @@ onMounted(startCamera)
       </div>
 
       <div class="camera-card">
-  <video
-    ref="videoRef"
-    autoplay
-    playsinline
-    muted
-    class="camera-video"
-  ></video>
+        <video
+          ref="videoRef"
+          autoplay
+          playsinline
+          muted
+          class="camera-video"
+        ></video>
 
-  <div v-if="flash" class="camera-flash"></div>
+        <div v-if="flash" class="camera-flash"></div>
 
-  <div v-if="countdownText" class="countdown">
-    {{ countdownText }}
-  </div>
-</div>
+        <div v-if="countdownText" class="countdown">
+          {{ countdownText }}
+        </div>
+      </div>
+
+      <p v-if="cameraError" class="error-box">
+        {{ cameraError }}
+      </p>
 
       <div class="action-panel">
         <button class="riell-btn primary" :disabled="isCapturing" @click="startSession">
           {{ isCapturing ? 'Capturing...' : `Start ${activeFrame.photoCount} Photos` }}
-        </button>
-
-        <button
-          v-if="photos.length > 0"
-          class="riell-btn primary"
-          @click="goPreview"
-        >
-          Continue to Preview
         </button>
 
         <label class="riell-btn ghost">
@@ -190,12 +230,3 @@ onMounted(startCamera)
     </section>
   </main>
 </template>
-
-const flash = ref(false)
-
-function triggerFlash() {
-  flash.value = true
-  setTimeout(() => {
-    flash.value = false
-  }, 160)
-}
