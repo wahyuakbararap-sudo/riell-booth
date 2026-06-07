@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { frames } from '../data/frames'
 import { filters } from '../data/filters'
@@ -11,12 +11,22 @@ const router = useRouter()
 const FRAME_W = 1181
 const FRAME_H = 1772
 
-const frameId = boothState.frameId || frames[0]!.id
-const photos = boothState.photos
+const frameId = boothState.frameId || sessionStorage.getItem('riell-frame') || frames[0]!.id
+const photos = boothState.photos.length
+  ? boothState.photos
+  : (JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[])
 
 const activeFrame = ref(frames.find((frame) => frame.id === frameId) ?? frames[0]!)
 const selectedFilter = ref(filters[0]!)
 const activeStickerCategory = ref(stickerCategories[0]!)
+
+const showAnimation = ref(true)
+
+onMounted(() => {
+  setTimeout(() => {
+    showAnimation.value = false
+  }, 1500)
+})
 
 type StickerItem = {
   id: number
@@ -33,12 +43,6 @@ type Slot = {
   round?: boolean
 }
 
-/**
- * Slot pakai ukuran asli frame 1181 x 1772.
- * Ini dibuat buat frame /frames/test1.png yang punya:
- * kiri atas bulat, kanan atas kotak, kiri tengah kotak,
- * kanan tengah bulat, kiri bawah bulat, kanan bawah kotak.
- */
 const frameSlots: Slot[] = [
   { x: 62, y: 54, w: 502, h: 503, round: true },
   { x: 615, y: 119, w: 512, h: 435 },
@@ -92,6 +96,7 @@ function removeSticker(id: number) {
 function retakePhoto(index: number) {
   sessionStorage.setItem('riell-retake-index', String(index))
   sessionStorage.setItem('riell-photos', JSON.stringify(photos))
+  sessionStorage.setItem('riell-frame', activeFrame.value.id)
   router.push(`/session/${activeFrame.value.id}`)
 }
 
@@ -174,11 +179,27 @@ async function downloadResult() {
   const frameImg = await loadImage(activeFrame.value.image || '/frames/test1.png')
   ctx.drawImage(frameImg, 0, 0, FRAME_W, FRAME_H)
 
+  const now = new Date()
+  const dateText = now.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).toUpperCase()
+
+  ctx.fillStyle = '#6b3f2a'
+  ctx.font = '38px Fredoka, Arial'
+  ctx.textAlign = 'center'
+  ctx.fillText(dateText, FRAME_W / 2, FRAME_H - 120)
+
+  ctx.font = '26px Fredoka, Arial'
+  ctx.fillText('RIELL BOOTH', FRAME_W / 2, FRAME_H - 70)
+
   const scaleX = FRAME_W / preview.clientWidth
   const scaleY = FRAME_H / preview.clientHeight
 
   ctx.font = '70px Arial'
   ctx.textAlign = 'left'
+
   placedStickers.value.forEach((sticker) => {
     ctx.fillText(sticker.emoji, sticker.x * scaleX, (sticker.y + 60) * scaleY)
   })
@@ -198,6 +219,12 @@ async function downloadResult() {
     @touchmove="dragSticker"
     @touchend="stopDrag"
   >
+    <Transition name="strip">
+      <div v-if="showAnimation" class="film-loading">
+        📸 Developing...
+      </div>
+    </Transition>
+
     <section class="preview-wrap">
       <div class="preview-head">
         <p class="eyebrow center">final touch</p>
@@ -263,6 +290,7 @@ async function downloadResult() {
       <div v-if="photos.length" class="editor-panel">
         <div>
           <p class="panel-title">Sticker</p>
+
           <div class="chip-row">
             <button
               v-for="category in stickerCategories"
@@ -289,6 +317,7 @@ async function downloadResult() {
 
         <div>
           <p class="panel-title">Filter</p>
+
           <div class="chip-row">
             <button
               v-for="filter in filters"
@@ -304,15 +333,41 @@ async function downloadResult() {
       </div>
 
       <div class="bottom-actions">
-        <button v-if="photos.length" class="riell-btn primary" @click="downloadResult">Download PNG</button>
-        <button class="riell-btn soft" @click="router.push('/layout')">Retake</button>
+        <button v-if="photos.length" class="riell-btn primary" @click="downloadResult">
+          Download PNG
+        </button>
+
+        <button class="riell-btn soft" @click="router.push('/layout')">
+          Retake All
+        </button>
       </div>
     </section>
   </main>
 </template>
 
-function retakePhoto(index: number) {
-  sessionStorage.setItem('riell-retake-index', String(index))
-  sessionStorage.setItem('riell-photos', JSON.stringify(photos))
-  router.push(`/session/${activeFrame.value.id}`)
+.film-loading {
+  position: fixed;
+  inset: 0;
+  background: #fff7ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  z-index: 999;
+}
+
+.strip-leave-active {
+  animation: stripDrop 1.2s ease forwards;
+}
+
+@keyframes stripDrop {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
 }

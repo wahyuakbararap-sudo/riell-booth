@@ -325,3 +325,35 @@ label {
   box-shadow: 0 8px 22px rgba(0,0,0,.18);
 }
 
+.film-loading{
+  position:fixed;
+  inset:0;
+  background:#fff7ed;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:28px;
+  font-weight:700;
+
+  z-index:999;
+}
+
+.strip-enter-active{
+  animation:stripDrop 1.4s ease;
+}
+
+@keyframes stripDrop{
+
+  0%{
+    transform:translateY(-100%);
+  }
+
+  100%{
+    transform:translateY(100%);
+    opacity:0;
+  }
+
+}
+
