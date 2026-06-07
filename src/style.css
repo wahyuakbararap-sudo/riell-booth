@@ -1,8 +1,14 @@
 /* =========================
    RIELL BOOTH FRAME V3
 ========================= */
+html, body, #app {
+  margin: 0;
+  min-height: 100%;
+  font-family: system-ui, sans-serif;
+}
+
 body {
-  background: red !important;
+  background: linear-gradient(135deg, #fff7ed, #ffe4e6, #fdf2f8);
 }
 
 .frame-canvas {
