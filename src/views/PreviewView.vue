@@ -7,9 +7,6 @@ import { stickerCategories } from '../data/stickers'
 
 const router = useRouter()
 
-const FRAME_W = 1181
-const FRAME_H = 1772
-
 const frameId = sessionStorage.getItem('riell-frame') || frames[0]!.id
 const photos = JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[]
 
@@ -18,11 +15,10 @@ const selectedFilter = ref(filters[0]!)
 const activeStickerCategory = ref(stickerCategories[0]!)
 const showAnimation = ref(true)
 
-onMounted(() => {
-  setTimeout(() => {
-    showAnimation.value = false
-  }, 1200)
-})
+const isJeansFrame = activeFrame.value.image?.includes('test2') || activeFrame.value.id === 'jeans-pocket-polaroid'
+
+const FRAME_W = isJeansFrame ? 1080 : 1181
+const FRAME_H = isJeansFrame ? 1920 : 1772
 
 type StickerItem = {
   id: number
@@ -39,7 +35,7 @@ type Slot = {
   round?: boolean
 }
 
-const frameSlots: Slot[] = [
+const fallbackSlots: Slot[] = [
   { x: 62, y: 54, w: 502, h: 503, round: true },
   { x: 615, y: 119, w: 512, h: 435 },
   { x: 62, y: 647, w: 503, h: 526 },
@@ -48,8 +44,19 @@ const frameSlots: Slot[] = [
   { x: 615, y: 1256, w: 512, h: 425 },
 ]
 
+const frameSlots: Slot[] = (activeFrame.value.slots?.length ? activeFrame.value.slots : fallbackSlots).map((slot, index) => ({
+  ...slot,
+  round: activeFrame.value.id === 'vintage-red' ? [0, 3, 4].includes(index) : false,
+}))
+
 const placedStickers = ref<StickerItem[]>([])
 const draggingId = ref<number | null>(null)
+
+onMounted(() => {
+  setTimeout(() => {
+    showAnimation.value = false
+  }, 1200)
+})
 
 function addSticker(emoji: string) {
   placedStickers.value.push({
@@ -93,13 +100,15 @@ function retakePhoto(index: number) {
   sessionStorage.setItem('riell-retake-index', String(index))
   sessionStorage.setItem('riell-photos', JSON.stringify(photos))
   sessionStorage.setItem('riell-frame', activeFrame.value.id)
+
   router.push(`/session/${activeFrame.value.id}`)
 }
 
 function loadImage(src: string) {
-  return new Promise<HTMLImageElement>((resolve) => {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image()
     img.onload = () => resolve(img)
+    img.onerror = reject
     img.src = src
   })
 }
@@ -131,6 +140,28 @@ function drawCoverImage(
   }
 
   ctx.drawImage(img, x + offsetX, y + offsetY, drawW, drawH)
+}
+
+function drawWatermark(ctx: CanvasRenderingContext2D) {
+  const now = new Date()
+  const dateText = now.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).toUpperCase()
+
+  ctx.save()
+  ctx.textAlign = 'center'
+  ctx.shadowColor = 'rgba(0,0,0,.18)'
+  ctx.shadowBlur = 12
+  ctx.fillStyle = isJeansFrame ? '#ffffff' : '#7c5b45'
+
+  ctx.font = isJeansFrame ? '24px Fredoka, Arial' : '22px Fredoka, Arial'
+  ctx.fillText('✦ RIELL BOOTH ✦', FRAME_W / 2, FRAME_H - 82)
+
+  ctx.font = isJeansFrame ? '20px Fredoka, Arial' : '18px Fredoka, Arial'
+  ctx.fillText(dateText, FRAME_W / 2, FRAME_H - 50)
+  ctx.restore()
 }
 
 async function downloadResult() {
@@ -175,20 +206,7 @@ async function downloadResult() {
   const frameImg = await loadImage(activeFrame.value.image || '/frames/test1.png')
   ctx.drawImage(frameImg, 0, 0, FRAME_W, FRAME_H)
 
-  const now = new Date()
-  const dateText = now.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).toUpperCase()
-
-  ctx.fillStyle = '#6b3f2a'
-  ctx.font = '38px Fredoka, Arial'
-  ctx.textAlign = 'center'
-  ctx.fillText(dateText, FRAME_W / 2, FRAME_H - 120)
-
-  ctx.font = '26px Fredoka, Arial'
-  ctx.fillText('RIELL BOOTH', FRAME_W / 2, FRAME_H - 70)
+  drawWatermark(ctx)
 
   const scaleX = FRAME_W / preview.clientWidth
   const scaleY = FRAME_H / preview.clientHeight
@@ -233,6 +251,7 @@ async function downloadResult() {
         v-if="photos.length"
         id="preview-area"
         class="frame-canvas"
+        :style="{ aspectRatio: `${FRAME_W} / ${FRAME_H}` }"
       >
         <img
           v-for="(photo, index) in photos.slice(0, 6)"

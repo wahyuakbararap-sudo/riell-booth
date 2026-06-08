@@ -33,6 +33,25 @@ export const frames: RiellFrame[] = [
     ],
   },
   {
+  id: 'jeans-pocket-polaroid',
+  name: 'Jeans Pocket Polaroid',
+  image: '/frames/test2.png',
+  photoCount: 6,
+  bg: '#1f3560',
+  accent: '#ffffff',
+
+  slots: [
+    { x: 111, y: 85, w: 366, h: 362 },
+    { x: 604, y: 85, w: 366, h: 362 },
+
+    { x: 111, y: 498, w: 366, h: 362 },
+    { x: 604, y: 498, w: 366, h: 362 },
+
+    { x: 111, y: 912, w: 366, h: 362 },
+    { x: 604, y: 912, w: 366, h: 362 },
+  ],
+},
+  {
     id: 'kawaii-grid',
     name: 'Kawaii Grid',
     photoCount: 4,

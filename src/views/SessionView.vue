@@ -84,7 +84,24 @@ function capturePhoto() {
   }
 
   // Hasil foto normal, gak gepeng, crop center
-  ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
+  ctx.save()
+
+ctx.translate(canvas.width, 0)
+ctx.scale(-1, 1)
+
+ctx.drawImage(
+  video,
+  sx,
+  sy,
+  sw,
+  sh,
+  0,
+  0,
+  canvas.width,
+  canvas.height
+)
+
+ctx.restore()
 
   const image = canvas.toDataURL('image/jpeg', 0.82)
   const retakeIndex = sessionStorage.getItem('riell-retake-index')
