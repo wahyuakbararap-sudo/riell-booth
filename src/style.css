@@ -353,3 +353,66 @@ label {
     opacity: 0;
   }
 }
+
+/* HOME DECOR UPGRADE */
+.home-vintage {
+  position: relative;
+  overflow: hidden;
+  align-items: center;
+  padding-top: 0;
+}
+
+.home-vintage::before {
+  content: "🌼";
+  position: absolute;
+  top: 12%;
+  left: 18%;
+  font-size: 52px;
+  opacity: .22;
+}
+
+.home-vintage::after {
+  content: "✨";
+  position: absolute;
+  bottom: 16%;
+  right: 20%;
+  font-size: 48px;
+  opacity: .25;
+}
+
+.hero-card {
+  transform: translateY(-35px);
+}
+
+.hero-card::before {
+  content: "🦋";
+  display: block;
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+.frame-count {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 2px dashed rgba(124, 45, 18, .16);
+}
+
+.frame-count h3 {
+  margin: 0 0 10px;
+  color: #7c2d12;
+  font-size: 17px;
+}
+
+.frame-list {
+  display: grid;
+  gap: 8px;
+}
+
+.frame-pill {
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #78350f;
+  font-size: 14px;
+  font-weight: 700;
+}

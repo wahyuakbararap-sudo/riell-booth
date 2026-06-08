@@ -18,6 +18,16 @@
         📸 Start Booth
       </button>
 
+      <div class="frame-count">
+  <h3>🎞 3 Frames Available</h3>
+
+  <div class="frame-list">
+    <div class="frame-pill">👖 Jeans Pocket Polaroid</div>
+    <div class="frame-pill">💜 Purple Cute Monster</div>
+    <div class="frame-pill">📷 Vintage Red</div>
+  </div>
+</div>
+
       <div class="features">
         <span>🎞 Vintage Frame</span>
         <span>✨ Sticker</span>
