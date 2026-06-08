@@ -39,25 +39,13 @@ export const frames: RiellFrame[] = [
   photoCount: 6,
   bg: '#1f3560',
   accent: '#ffffff',
-
   slots: [
-    // kiri atas
-    { x: 289, y: 463, w: 250, h: 165 },
-
-    // kiri tengah
-    { x: 299, y: 640, w: 250, h: 167 },
-
-    // kiri bawah
-    { x: 309, y: 819, w: 250, h: 165 },
-
-    // kanan atas
-    { x: 516, y: 424, w: 267, h: 175 },
-
-    // kanan tengah
-    { x: 507, y: 614, w: 266, h: 175 },
-
-    // kanan bawah
-    { x: 497, y: 804, w: 266, h: 175 },
+    { x: 282, y: 456, w: 265, h: 180 },
+    { x: 292, y: 633, w: 265, h: 180 },
+    { x: 302, y: 812, w: 265, h: 180 },
+    { x: 510, y: 418, w: 280, h: 188 },
+    { x: 501, y: 608, w: 280, h: 188 },
+    { x: 491, y: 798, w: 280, h: 188 },
   ],
 },
   {
