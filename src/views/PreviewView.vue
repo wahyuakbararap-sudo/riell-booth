@@ -217,7 +217,7 @@ async function downloadResult() {
   >
     <Transition name="strip">
       <div v-if="showAnimation" class="film-loading">
-        📸 Developing...
+        📸 Cekrekkkk...
       </div>
     </Transition>
 

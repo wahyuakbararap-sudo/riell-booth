@@ -61,10 +61,8 @@ function capturePhoto() {
   if (!video) return
 
   const canvas = document.createElement('canvas')
-
-  // Ukuran kecil biar HP gak stuck karena sessionStorage kepenuhan.
-  canvas.width = 540
-  canvas.height = 720
+  canvas.width = 720
+  canvas.height = 960
 
   const ctx = canvas.getContext('2d')
   if (!ctx) return
@@ -85,23 +83,22 @@ function capturePhoto() {
     sy = (video.videoHeight - sh) / 2
   }
 
+  // Hasil foto normal, gak gepeng, crop center
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
 
-  const image = canvas.toDataURL('image/jpeg', 0.72)
+  const image = canvas.toDataURL('image/jpeg', 0.82)
   const retakeIndex = sessionStorage.getItem('riell-retake-index')
 
-  // Retake 1 foto aja.
   if (retakeIndex !== null) {
     const savedPhotos = JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[]
     savedPhotos[Number(retakeIndex)] = image
-
-    photos.value = savedPhotos
 
     sessionStorage.removeItem('riell-retake-index')
     sessionStorage.setItem('riell-frame', activeFrame.value.id)
     sessionStorage.setItem('riell-photos', JSON.stringify(savedPhotos))
 
-    router.replace({ name: 'preview' })
+    photos.value = savedPhotos
+    goPreview()
     return
   }
 
