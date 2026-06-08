@@ -50,18 +50,36 @@ export const frames: RiellFrame[] = [
 ],
 },
   {
-    id: 'kawaii-grid',
-    name: 'Kawaii Grid',
-    photoCount: 4,
-    bg: '#ffe4f3',
-    accent: '#ec4899',
-    slots: [
-      { x: 80, y: 190, w: 440, h: 500 },
-      { x: 560, y: 190, w: 440, h: 500 },
-      { x: 80, y: 730, w: 440, h: 500 },
-      { x: 560, y: 730, w: 440, h: 500 },
-    ],
-  },
+  id: 'Purple-Cuteeeeee',
+  name: 'Purple Cuteeeeee',
+  image: '/frames/test3.png',
+  photoCount: 3,
+  bg: '#b7b2e6',
+  accent: '#ffffff',
+
+  slots: [
+    {
+      x: 76,
+      y: 74,
+      w: 560,
+      h: 500,
+    },
+
+    {
+      x: 76,
+      y: 646,
+      w: 560,
+      h: 500,
+    },
+
+    {
+      x: 76,
+      y: 1218,
+      w: 560,
+      h: 500,
+    },
+  ],
+},
   {
     id: 'classic-strip',
     name: 'Classic Strip',
