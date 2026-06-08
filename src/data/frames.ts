@@ -41,14 +41,23 @@ export const frames: RiellFrame[] = [
   accent: '#ffffff',
 
   slots: [
-    { x: 111, y: 85, w: 366, h: 362 },
-    { x: 604, y: 85, w: 366, h: 362 },
+    // kiri atas
+    { x: 289, y: 463, w: 250, h: 165 },
 
-    { x: 111, y: 498, w: 366, h: 362 },
-    { x: 604, y: 498, w: 366, h: 362 },
+    // kiri tengah
+    { x: 299, y: 640, w: 250, h: 167 },
 
-    { x: 111, y: 912, w: 366, h: 362 },
-    { x: 604, y: 912, w: 366, h: 362 },
+    // kiri bawah
+    { x: 309, y: 819, w: 250, h: 165 },
+
+    // kanan atas
+    { x: 516, y: 424, w: 267, h: 175 },
+
+    // kanan tengah
+    { x: 507, y: 614, w: 266, h: 175 },
+
+    // kanan bawah
+    { x: 497, y: 804, w: 266, h: 175 },
   ],
 },
   {

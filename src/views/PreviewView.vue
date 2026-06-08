@@ -139,7 +139,13 @@ function drawCoverImage(
     offsetY = (h - drawH) / 2
   }
 
-  ctx.drawImage(img, x + offsetX, y + offsetY, drawW, drawH)
+  ctx.drawImage(
+    img,
+    x + offsetX,
+    y + offsetY,
+    drawW,
+    drawH
+  )
 }
 
 function drawWatermark(ctx: CanvasRenderingContext2D) {
@@ -197,7 +203,14 @@ async function downloadResult() {
     }
 
     ctx.clip()
-    drawCoverImage(ctx, img, slot.x, slot.y, slot.w, slot.h)
+    drawCoverImage(
+  ctx,
+  img,
+  slot.x,
+  slot.y,
+  slot.w,
+  slot.h
+)
     ctx.restore()
   }
 
