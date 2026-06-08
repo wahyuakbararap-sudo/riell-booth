@@ -14,8 +14,11 @@ const activeFrame = ref(frames.find((frame) => frame.id === frameId) ?? frames[0
 const selectedFilter = ref(filters[0]!)
 const activeStickerCategory = ref(stickerCategories[0]!)
 const showAnimation = ref(true)
+const customText = ref(sessionStorage.getItem('riell-custom-text') || '')
 
-const isJeansFrame = activeFrame.value.image?.includes('test2') || activeFrame.value.id === 'jeans-pocket-polaroid'
+const isJeansFrame =
+  activeFrame.value.image?.includes('test2') ||
+  activeFrame.value.id === 'jeans-pocket-polaroid'
 
 const FRAME_W = activeFrame.value.width || 1181
 const FRAME_H = activeFrame.value.height || 1772
@@ -44,7 +47,9 @@ const fallbackSlots: Slot[] = [
   { x: 615, y: 1256, w: 512, h: 425 },
 ]
 
-const frameSlots: Slot[] = (activeFrame.value.slots?.length ? activeFrame.value.slots : fallbackSlots).map((slot, index) => ({
+const frameSlots: Slot[] = (
+  activeFrame.value.slots?.length ? activeFrame.value.slots : fallbackSlots
+).map((slot, index) => ({
   ...slot,
   round: activeFrame.value.id === 'vintage-red' ? [0, 3, 4].includes(index) : false,
 }))
@@ -57,6 +62,10 @@ onMounted(() => {
     showAnimation.value = false
   }, 1200)
 })
+
+function saveCustomText() {
+  sessionStorage.setItem('riell-custom-text', customText.value.trim())
+}
 
 function addSticker(emoji: string) {
   placedStickers.value.push({
@@ -139,22 +148,20 @@ function drawCoverImage(
     offsetY = (h - drawH) / 2
   }
 
-  ctx.drawImage(
-    img,
-    x + offsetX,
-    y + offsetY,
-    drawW,
-    drawH
-  )
+  ctx.drawImage(img, x + offsetX, y + offsetY, drawW, drawH)
 }
 
 function drawWatermark(ctx: CanvasRenderingContext2D) {
   const now = new Date()
-  const dateText = now.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).toUpperCase()
+  const dateText = now
+    .toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+    .toUpperCase()
+
+  const text = customText.value.trim()
 
   ctx.save()
   ctx.textAlign = 'center'
@@ -162,11 +169,17 @@ function drawWatermark(ctx: CanvasRenderingContext2D) {
   ctx.shadowBlur = 12
   ctx.fillStyle = isJeansFrame ? '#ffffff' : '#7c5b45'
 
-  ctx.font = isJeansFrame ? '24px Fredoka, Arial' : '22px Fredoka, Arial'
-  ctx.fillText('✦ RIELL BOOTH ✦', FRAME_W / 2, FRAME_H - 82)
+  if (text) {
+    ctx.font = isJeansFrame ? '26px Fredoka, Arial' : '24px Fredoka, Arial'
+    ctx.fillText(`♡ ${text.toUpperCase()} ♡`, FRAME_W / 2, FRAME_H - 118)
+  }
 
-  ctx.font = isJeansFrame ? '20px Fredoka, Arial' : '18px Fredoka, Arial'
-  ctx.fillText(dateText, FRAME_W / 2, FRAME_H - 50)
+  ctx.font = isJeansFrame ? '22px Fredoka, Arial' : '20px Fredoka, Arial'
+  ctx.fillText('✦ RIELL BOOTH ✦', FRAME_W / 2, text ? FRAME_H - 78 : FRAME_H - 92)
+
+  ctx.font = isJeansFrame ? '18px Fredoka, Arial' : '17px Fredoka, Arial'
+  ctx.fillText(dateText, FRAME_W / 2, text ? FRAME_H - 48 : FRAME_H - 58)
+
   ctx.restore()
 }
 
@@ -197,20 +210,19 @@ async function downloadResult() {
     ctx.beginPath()
 
     if (slot.round) {
-      ctx.arc(slot.x + slot.w / 2, slot.y + slot.h / 2, Math.min(slot.w, slot.h) / 2, 0, Math.PI * 2)
+      ctx.arc(
+        slot.x + slot.w / 2,
+        slot.y + slot.h / 2,
+        Math.min(slot.w, slot.h) / 2,
+        0,
+        Math.PI * 2
+      )
     } else {
       ctx.roundRect(slot.x, slot.y, slot.w, slot.h, 26)
     }
 
     ctx.clip()
-    drawCoverImage(
-  ctx,
-  img,
-  slot.x,
-  slot.y,
-  slot.w,
-  slot.h
-)
+    drawCoverImage(ctx, img, slot.x, slot.y, slot.w, slot.h)
     ctx.restore()
   }
 
@@ -256,7 +268,7 @@ async function downloadResult() {
       <div class="preview-head">
         <p class="eyebrow center">final touch</p>
         <h1>Preview Result</h1>
-        <p v-if="photos.length">Pilih filter, sticker, lalu download.</p>
+        <p v-if="photos.length">Pilih filter, sticker, memory text, lalu download.</p>
         <p v-else>Belum ada foto. Balik ambil foto dulu.</p>
       </div>
 
@@ -313,6 +325,22 @@ async function downloadResult() {
         >
           {{ sticker.emoji }}
         </div>
+      </div>
+
+      <div v-if="photos.length" class="editor-panel">
+        <p class="panel-title">Memory Text</p>
+
+        <input
+          v-model="customText"
+          class="memory-input"
+          maxlength="24"
+          placeholder="contoh: Bestie Night"
+          @input="saveCustomText"
+        />
+
+        <p class="memory-preview">
+          {{ customText ? `♡ ${customText} ♡` : '♡ Your Memory Text ♡' }}
+        </p>
       </div>
 
       <div v-if="photos.length" class="editor-panel">
