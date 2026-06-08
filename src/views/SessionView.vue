@@ -61,8 +61,8 @@ function capturePhoto() {
   if (!video) return
 
   const canvas = document.createElement('canvas')
-  canvas.width = 720
-  canvas.height = 960
+  canvas.width = 640
+  canvas.height = 640
 
   const ctx = canvas.getContext('2d')
   if (!ctx) return
