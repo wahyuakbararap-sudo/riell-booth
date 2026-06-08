@@ -4,28 +4,24 @@ import { useRouter } from 'vue-router'
 import { frames } from '../data/frames'
 import { filters } from '../data/filters'
 import { stickerCategories } from '../data/stickers'
-import { boothState } from '../stores/boothStore'
 
 const router = useRouter()
 
 const FRAME_W = 1181
 const FRAME_H = 1772
 
-const frameId = boothState.frameId || sessionStorage.getItem('riell-frame') || frames[0]!.id
-const photos = boothState.photos.length
-  ? boothState.photos
-  : (JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[])
+const frameId = sessionStorage.getItem('riell-frame') || frames[0]!.id
+const photos = JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[]
 
 const activeFrame = ref(frames.find((frame) => frame.id === frameId) ?? frames[0]!)
 const selectedFilter = ref(filters[0]!)
 const activeStickerCategory = ref(stickerCategories[0]!)
-
 const showAnimation = ref(true)
 
 onMounted(() => {
   setTimeout(() => {
     showAnimation.value = false
-  }, 1500)
+  }, 1200)
 })
 
 type StickerItem = {

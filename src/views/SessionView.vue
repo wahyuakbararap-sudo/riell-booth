@@ -61,8 +61,10 @@ function capturePhoto() {
   if (!video) return
 
   const canvas = document.createElement('canvas')
-  canvas.width = 900
-  canvas.height = 1200
+
+  // Ukuran kecil biar HP gak stuck karena sessionStorage kepenuhan.
+  canvas.width = 540
+  canvas.height = 720
 
   const ctx = canvas.getContext('2d')
   if (!ctx) return
@@ -85,9 +87,10 @@ function capturePhoto() {
 
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
 
-  const image = canvas.toDataURL('image/png')
+  const image = canvas.toDataURL('image/jpeg', 0.72)
   const retakeIndex = sessionStorage.getItem('riell-retake-index')
 
+  // Retake 1 foto aja.
   if (retakeIndex !== null) {
     const savedPhotos = JSON.parse(sessionStorage.getItem('riell-photos') || '[]') as string[]
     savedPhotos[Number(retakeIndex)] = image
@@ -98,7 +101,7 @@ function capturePhoto() {
     sessionStorage.setItem('riell-frame', activeFrame.value.id)
     sessionStorage.setItem('riell-photos', JSON.stringify(savedPhotos))
 
-    goPreview()
+    router.replace({ name: 'preview' })
     return
   }
 
@@ -109,11 +112,7 @@ async function goPreview() {
   sessionStorage.setItem('riell-frame', activeFrame.value.id)
   sessionStorage.setItem('riell-photos', JSON.stringify(photos.value))
 
-  try {
-    await router.replace({ name: 'preview' })
-  } catch {
-    window.location.hash = '#/preview'
-  }
+  await router.replace({ name: 'preview' })
 }
 
 async function startSession() {
@@ -121,6 +120,7 @@ async function startSession() {
 
   const retakeIndex = sessionStorage.getItem('riell-retake-index')
 
+  // Kalau dari tombol retake, ambil 1 foto aja.
   if (retakeIndex !== null) {
     isCapturing.value = true
     await countdown()
@@ -141,8 +141,6 @@ async function startSession() {
   }
 
   isCapturing.value = false
-
-  // Delay kecil biar UI sempet update 6/6, lalu auto next
   await new Promise((resolve) => setTimeout(resolve, 300))
   await goPreview()
 }
@@ -154,7 +152,6 @@ function uploadPhotos(e: Event) {
   photos.value = []
 
   const files = Array.from(input.files).slice(0, activeFrame.value.photoCount)
-
   if (files.length === 0) return
 
   let loaded = 0
