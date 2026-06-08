@@ -1,17 +1,23 @@
-export type FrameSlot = {
+export interface FrameSlot {
   x: number
   y: number
   w: number
   h: number
 }
 
-export type RiellFrame = {
+export interface RiellFrame {
   id: string
   name: string
-  image?: string
+  image: string
+
   photoCount: number
+
   bg: string
   accent: string
+
+  width?: number
+  height?: number
+
   slots: FrameSlot[]
 }
 
@@ -50,58 +56,18 @@ export const frames: RiellFrame[] = [
 ],
 },
   {
-  id: 'Purple-Cuteeeeee',
-  name: 'Purple Cuteeeeee',
+  id: 'Purple-Cute',
+  name: 'Purple Cute',
   image: '/frames/test3.png',
   photoCount: 3,
   bg: '#b7b2e6',
   accent: '#ffffff',
-
+  width: 707,
+  height: 2000,
   slots: [
-    {
-      x: 76,
-      y: 74,
-      w: 560,
-      h: 500,
-    },
-
-    {
-      x: 76,
-      y: 646,
-      w: 560,
-      h: 500,
-    },
-
-    {
-      x: 76,
-      y: 1218,
-      w: 560,
-      h: 500,
-    },
+    { x: 74, y: 74, w: 560, h: 507 },
+    { x: 74, y: 631, w: 560, h: 507 },
+    { x: 74, y: 1188, w: 560, h: 507 },
   ],
 },
-  {
-    id: 'classic-strip',
-    name: 'Classic Strip',
-    photoCount: 4,
-    bg: '#fff7ed',
-    accent: '#92400e',
-    slots: [
-      { x: 170, y: 190, w: 740, h: 360 },
-      { x: 170, y: 590, w: 740, h: 360 },
-      { x: 170, y: 990, w: 740, h: 360 },
-      { x: 170, y: 1390, w: 740, h: 360 },
-    ],
-  },
-  {
-    id: 'duo-soft',
-    name: 'Duo Soft',
-    photoCount: 2,
-    bg: '#eff6ff',
-    accent: '#2563eb',
-    slots: [
-      { x: 120, y: 230, w: 840, h: 560 },
-      { x: 120, y: 870, w: 840, h: 560 },
-    ],
-  },
 ]

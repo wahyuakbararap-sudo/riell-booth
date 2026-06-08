@@ -17,8 +17,8 @@ const showAnimation = ref(true)
 
 const isJeansFrame = activeFrame.value.image?.includes('test2') || activeFrame.value.id === 'jeans-pocket-polaroid'
 
-const FRAME_W = isJeansFrame ? 1080 : 1181
-const FRAME_H = isJeansFrame ? 1920 : 1772
+const FRAME_W = activeFrame.value.width || 1181
+const FRAME_H = activeFrame.value.height || 1772
 
 type StickerItem = {
   id: number
