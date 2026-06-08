@@ -1,8 +1,9 @@
-export interface FrameSlot {
+export type FrameSlot = {
   x: number
   y: number
   w: number
   h: number
+  round?: boolean
 }
 
 export interface RiellFrame {
@@ -30,13 +31,15 @@ export const frames: RiellFrame[] = [
     bg: '#ffffff',
     accent: '#991b1b',
     slots: [
-      { x: 95, y: 170, w: 390, h: 330 },
-      { x: 595, y: 170, w: 390, h: 330 },
-      { x: 95, y: 580, w: 390, h: 330 },
-      { x: 595, y: 580, w: 390, h: 330 },
-      { x: 95, y: 990, w: 390, h: 330 },
-      { x: 595, y: 990, w: 390, h: 330 },
-    ],
+  { x: 62, y: 54, w: 502, h: 503, round: true },
+  { x: 615, y: 119, w: 512, h: 435 },
+
+  { x: 62, y: 647, w: 503, h: 526 },
+  { x: 615, y: 630, w: 512, h: 512, round: true },
+
+  { x: 62, y: 1217, w: 503, h: 503, round: true },
+  { x: 615, y: 1256, w: 512, h: 425 },
+],
   },
   {
   id: 'jeans-pocket-polaroid',

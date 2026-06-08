@@ -47,12 +47,10 @@ const fallbackSlots: Slot[] = [
   { x: 615, y: 1256, w: 512, h: 425 },
 ]
 
-const frameSlots: Slot[] = (
-  activeFrame.value.slots?.length ? activeFrame.value.slots : fallbackSlots
-).map((slot, index) => ({
-  ...slot,
-  round: activeFrame.value.id === 'vintage-red' ? [0, 3, 4].includes(index) : false,
-}))
+const frameSlots: Slot[] =
+  activeFrame.value.slots?.length
+    ? activeFrame.value.slots
+    : fallbackSlots
 
 const placedStickers = ref<StickerItem[]>([])
 const draggingId = ref<number | null>(null)
